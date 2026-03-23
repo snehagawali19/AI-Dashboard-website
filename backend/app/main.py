@@ -5,8 +5,9 @@ from fastapi.middleware.cors import CORSMiddleware
 from app.config import settings
 from app.routers import news, favorites, broadcast
 from app.tasks.scheduler import start_scheduler
-
-logging.basicConfig(level=logging.INFO)
+from app.database import engine
+from app.models import Base
+base.metadata.create_all(bind=engine)
 
 
 @asynccontextmanager
