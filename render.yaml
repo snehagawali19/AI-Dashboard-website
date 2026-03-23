@@ -1,0 +1,36 @@
+databases:
+  - name: ainews-db
+    databaseName: ainews
+    user: ainews
+    plan: free
+
+services:
+  - type: web
+    name: ainews-backend
+    runtime: python
+    buildCommand: pip install -r requirements.txt && alembic upgrade head
+    startCommand: uvicorn app.main:app --host 0.0.0.0 --port $PORT
+    rootDir: backend
+    plan: free
+    envVars:
+      - key: DATABASE_URL
+        fromDatabase:
+          name: ainews-db
+          property: connectionString
+      - key: OPENAI_API_KEY
+        sync: false # set manually in Render dashboard
+      - key: CORS_ORIGINS
+        value: '["https://ainews-frontend.onrender.com"]'
+      - key: AI_ENABLED
+        value: "true"
+
+  - type: web
+    name: ainews-frontend
+    runtime: node
+    buildCommand: npm install && npm run build
+    startCommand: node .next/standalone/server.js
+    rootDir: frontend
+    plan: free
+    envVars:
+      - key: NEXT_PUBLIC_API_URL
+        value: https://ainews-backend.onrender.com
